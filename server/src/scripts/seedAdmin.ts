@@ -1,3 +1,4 @@
+// Одноразовый скрипт для запуска вручную
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
@@ -25,4 +26,6 @@ main()
     console.error(err);
     process.exitCode = 1;
   })
+  // Открытое соединение с базой не даёт процессу завершиться,
+  // поэтому закрываем его в любом случае
   .finally(() => mongoose.disconnect());

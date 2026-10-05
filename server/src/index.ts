@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "dotenv/config"; // всегда первой строкой - добавляет значения в process.env из env
 import express from "express";
 import cors from "cors";
 import { connectDb } from "./db.js";
@@ -9,8 +9,8 @@ import { User } from './models/User.js';
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+app.use(cors()); // разрешаем кроссдоменные запросы
+app.use(express.json()); // Превращает JSON из тела запроса в объект и кладёт в req.body
 app.use("/api/auth", authRouter);
 
 app.get('/health', (_req, res) => {

@@ -7,6 +7,7 @@ import { User } from '../models/User.js';
 
 export const authRouter = Router();
 
+// схема того, что ждем от клиента
 const credentialsSchema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email()),
   password: z.string().min(8).max(72),

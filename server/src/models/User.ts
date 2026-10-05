@@ -30,4 +30,5 @@ const userSchema = new Schema<IUser>(
   { timestamps: true },
 );
 
+// Mongoose сам создаст коллекцию с именем 'users' (имя модели во множественном числе).
 export const User = model<IUser>('User', userSchema);
