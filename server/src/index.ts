@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { connectDb } from "./db.js";
+import { config } from "./config.js";
 
 const app = express();
 
@@ -14,9 +15,7 @@ app.get('/health', (_req, res) => {
 
 async function start() {
   await connectDb();
-
-  const port = Number(process.env.PORT) || 3000;
-  app.listen(port, () => console.log(`Сервер запущен на порту: ${port}`));
+  app.listen(config.port, () => console.log(`Сервер запущен на порту: ${config.port}`));
 }
 
 start().catch((err) => {
