@@ -4,6 +4,8 @@ import cors from "cors";
 import { connectDb } from "./db.js";
 import { config } from "./config.js";
 import { authRouter } from "./routes/auth.js";
+import { requireAuth } from './middleware/auth.js';
+import { User } from './models/User.js';
 
 const app = express();
 
@@ -14,6 +16,17 @@ app.use("/api/auth", authRouter);
 app.get('/health', (_req, res) => {
   res.json({ status: "ok" });
 });
+
+app.get("/api/me", requireAuth, async (req, res) => {
+  const user = await User.findById(req.user!.id).select("~passwordHash");
+
+  if (!user) {
+    res.status(401).json({ message: "Пользователь не найден" });
+    return;
+  }
+  
+  res.json(user);
+})
 
 async function start() {
   await connectDb();
