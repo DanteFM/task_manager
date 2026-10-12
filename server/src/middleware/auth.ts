@@ -22,6 +22,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
 
     if (typeof payload === 'string' || !payload.sub) throw new Error('Неверный токен');
     req.user = { id: payload.sub, role: payload.role };
+    next();
   } catch {
     res.status(401).json({ message: 'Токен недействителен или истёк' });
   }
