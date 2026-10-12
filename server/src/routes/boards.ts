@@ -81,4 +81,106 @@ boardsRouter.get('/:id', async (req, res) => {
 
   const statuses = await Status.find({ boardId: board._id }).sort({ order: 1 });
   res.json({ board, statuses });
-})
+});
+
+const statusTitleSchema = z.object({
+  title: z.string().trim().min(1).max(50),
+});
+
+// Доска текущего админа или null. Сразу проверяет и формат id, и владельца:
+// чужую доску админ не увидит, даже зная её id.
+async function findOwnedBoard(boardId: unknown, userId: string) {
+  if (!isObjectId(boardId)) return null;
+  return Board.findOne({ _id: boardId, ownerId: userId });
+}
+
+// Добавить статус
+boardsRouter.post('/:id/statuses', requireRole('admin'), async (req, res) => {
+  const board = await findOwnedBoard(req.params.id, req.user!.id);
+  if (!board) {
+    res.status(404).json({ message: 'Доска не найдена' });
+    return;
+  }
+
+  const parsed = statusTitleSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ message: 'Некорректные данные', errors: z.treeifyError(parsed.error) });
+    return;
+  }
+
+  const { title } = parsed.data;
+
+  if (await Status.exists({ boardId: board._id, title })) {
+    res.status(409).json({ message: 'Статус с таким названием уже есть на доске' });
+    return;
+  }
+
+  // Новый статус встаёт в конец: order = максимальный + 1
+  const last = await Status.findOne({ boardId: board._id }).sort({ order: -1 });
+  const status = await Status.create({ boardId: board._id, title, order: last ? last.order + 1 : 0 });
+
+  res.status(201).json(status);
+});
+
+// Переименовать статус
+boardsRouter.patch('/:id/statuses/:statusId', requireRole('admin'), async (req, res) => {
+  const board = await findOwnedBoard(req.params.id, req.user!.id);
+  const { statusId } = req.params;
+
+  if (!board || !isObjectId(statusId)) {
+    res.status(404).json({ message: 'Статус не найден' });
+    return;
+  }
+
+  const parsed = statusTitleSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ message: 'Некорректные данные', errors: z.treeifyError(parsed.error) });
+    return;
+  }
+
+  const { title } = parsed.data;
+
+  // $ne: исключаем сам этот статус, чтобы можно было "переименовать" в то же название
+  if (await Status.exists({ boardId: board._id, title, _id: { $ne: statusId }})) {
+    res.status(409).json({ message: "Статус с таким названием уже есть на доске" });
+    return;
+  }
+
+  // В фильтре и _id, и boardId: нельзя изменить статус другой доски, подставив его id
+  const status = await Status.findOneAndUpdate(
+    { _id: statusId, boardId: board._id },
+    { title },
+    { new: true } // вернуть после обновления, а не до
+  );
+
+  if (!status) {
+    res.status(404).json({ message: 'Статус не найден' });
+    return;
+  }
+
+  res.json(status);
+});
+
+// Удалить статус
+boardsRouter.delete('/:id/statuses/:statusId', requireRole('admin'), async (req, res) => {
+  const board = await findOwnedBoard(req.params.id, req.user!.id);
+  const { statusId } = req.params;
+  if (!board || !isObjectId(statusId)) {
+    res.status(404).json({ message: 'Статус не найден' });
+    return;
+  }
+
+  // Нельзя удалить статус, на который ссылаются задачи: они бы остались с "битой ссылкой
+  if (await Task.exists({ statusId })) {
+    res.status(409).json({ message: 'В статусе есть задачи, сначала перенесите их' });
+    return;
+  }
+
+  const deleted = await Status.findOneAndDelete({ _id: statusId, boardId: board._id });
+  if (!deleted) {
+    res.status(404).json({ message: 'Статус не найден' });
+    return;
+  }
+
+  res.status(204).end(); // 204 No Content: успех без тела ответа
+});
