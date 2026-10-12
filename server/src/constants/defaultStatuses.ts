@@ -1,0 +1,1 @@
+export const DEFAULT_STATUSES = ['К выполнению', 'В работе', 'Готово'];
