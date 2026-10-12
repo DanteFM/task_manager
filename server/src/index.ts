@@ -7,6 +7,7 @@ import { authRouter } from "./routes/auth.js";
 import { requireAuth } from './middleware/auth.js';
 import { User } from './models/User.js';
 import { boardsRouter } from "./routes/boards.js";
+import { tagsRouter } from "./routes/routes.js";
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(cors()); // разрешаем кроссдоменные запросы
 app.use(express.json()); // Превращает JSON из тела запроса в объект и кладёт в req.body
 app.use("/api/auth", authRouter);
 app.use('/api/boards', boardsRouter);
+app.use('/api/tags', tagsRouter);
 
 app.get('/health', (_req, res) => {
   res.json({ status: "ok" });

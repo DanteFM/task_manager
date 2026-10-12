@@ -42,6 +42,8 @@ npm run dev                 # http://localhost:3000
 | POST | `/api/boards/:id/statuses` | admin (владелец) | добавить статус |
 | PATCH | `/api/boards/:id/statuses/:statusId` | admin (владелец) | переименовать статус |
 | DELETE | `/api/boards/:id/statuses/:statusId` | admin (владелец) | удалить статус (если в нём нет задач) |
+| GET | `/api/tags` | авторизованные | список тегов |
+| POST | `/api/tags` | admin | создать тег |
 
 Защищённые запросы: заголовок `Authorization: Bearer <token>`.
 
