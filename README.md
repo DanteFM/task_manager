@@ -39,6 +39,9 @@ npm run dev                 # http://localhost:3000
 | GET | `/api/boards` | авторизованные | доски, доступные пользователю (админ: свои, исполнитель: где есть его задачи) |
 | POST | `/api/boards` | admin | создать доску; статусы создаются по шаблону |
 | GET | `/api/boards/:id` | с доступом к доске | доска со статусами |
+| POST | `/api/boards/:id/statuses` | admin (владелец) | добавить статус |
+| PATCH | `/api/boards/:id/statuses/:statusId` | admin (владелец) | переименовать статус |
+| DELETE | `/api/boards/:id/statuses/:statusId` | admin (владелец) | удалить статус (если в нём нет задач) |
 
 Защищённые запросы: заголовок `Authorization: Bearer <token>`.
 
