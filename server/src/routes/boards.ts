@@ -8,6 +8,7 @@ import { Task } from '../models/Task.js';
 import { isObjectId } from '../utils/objectId.js';
 import { userCanAccessBoard } from '../services/boardAccess.js';
 import { statusesRouter } from './statuses.js';
+import { Role } from '../constants/roles.js';
 
 export const boardsRouter = Router();
 
@@ -22,7 +23,7 @@ const createBoardSchema = z.object({
 });
 
 // Создать доску (также создаются статусы для нее по шаблону)
-boardsRouter.post('/', requireRole('admin'), async (req, res) => {
+boardsRouter.post('/', requireRole(Role.admin), async (req, res) => {
   const parsed = createBoardSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ message: 'Некорректные данные', errors: z.treeifyError(parsed.error) });
@@ -45,7 +46,7 @@ boardsRouter.post('/', requireRole('admin'), async (req, res) => {
 boardsRouter.get('/', async (req, res) => {
   const user = req.user!;
 
-  const filter = user.role === 'admin'
+  const filter = user.role === Role.admin
     ? { ownerId: user.id }
     // distinct возвращает массив уникальных boardId из задач этого исполнителя
     : { _id: { $in: await Task.distinct('boardId', { assigneeId: user.id }) } };

@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
 import { connectDb } from '../db.js';
 import { User } from '../models/User.js';
+import { Role } from '../constants/roles.js';
 
 async function main() {
   const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
@@ -15,7 +16,7 @@ async function main() {
   const passwordHash = await bcrypt.hash(password, 10);
   await User.findOneAndUpdate(
     { email },
-    { email, passwordHash, role: 'admin' },
+    { email, passwordHash, role: Role.admin },
     { upsert: true },
   );
   console.log(`Админ ${email} создан/обновлён`)

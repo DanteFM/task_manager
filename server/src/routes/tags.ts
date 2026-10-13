@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { Tag } from '../models/Tag.js';
+import { Role } from '../constants/roles.js';
 
 export const tagsRouter = Router();
 
@@ -18,7 +19,7 @@ tagsRouter.get('/', async (_req, res) => {
 });
 
 // Создать тег (только админ)
-tagsRouter.post('/', requireRole('admin'), async (req, res) => {
+tagsRouter.post('/', requireRole(Role.admin), async (req, res) => {
   const parsed = createTagSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ message: 'Некорректные данные', errors: z.treeifyError(parsed.error) });

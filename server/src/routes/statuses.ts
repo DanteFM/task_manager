@@ -5,6 +5,7 @@ import { Status } from '../models/Status.js';
 import { Task } from '../models/Task.js';
 import { findOwnedBoard } from '../services/boardAccess.js';
 import { isObjectId } from '../utils/objectId.js';
+import { Role } from '../constants/roles.js';
 
 // mergeParams: true — без него параметр :boardId из родительского пути
 // в этом роутере был бы недоступен (req.params.boardId === undefined)
@@ -15,7 +16,7 @@ const statusTitleSchema = z.object({
 });
 
 // Добавить статус
-statusesRouter.post('/', requireRole('admin'), async (req, res) => {
+statusesRouter.post('/', requireRole(Role.admin), async (req, res) => {
   const board = await findOwnedBoard(req.params.boardId, req.user!.id);
   if (!board) {
     res.status(404).json({ message: 'Доска не найдена' });
@@ -43,7 +44,7 @@ statusesRouter.post('/', requireRole('admin'), async (req, res) => {
 });
 
 // Переименовать статус
-statusesRouter.patch('/:statusId', requireRole('admin'), async (req, res) => {
+statusesRouter.patch('/:statusId', requireRole(Role.admin), async (req, res) => {
   const board = await findOwnedBoard(req.params.boardId, req.user!.id);
   const { statusId } = req.params;
 
@@ -82,7 +83,7 @@ statusesRouter.patch('/:statusId', requireRole('admin'), async (req, res) => {
 });
 
 // Удалить статус
-statusesRouter.delete('/:statusId', requireRole('admin'), async (req, res) => {
+statusesRouter.delete('/:statusId', requireRole(Role.admin), async (req, res) => {
   const board = await findOwnedBoard(req.params.boardId, req.user!.id);
   const { statusId } = req.params;
   if (!board || !isObjectId(statusId)) {

@@ -1,11 +1,10 @@
 import { Schema, model } from "mongoose";
-
-export type UserRole = "admin" | "executor";
+import { Role } from "../constants/roles.js";
 
 export interface IUser {
   email: string;
   passwordHash: string;
-  role: UserRole;
+  role: Role;
 }
 
 const userSchema = new Schema<IUser>(
@@ -23,8 +22,8 @@ const userSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ["admin", "executor"],
-      default: "executor"
+      enum: Role,
+      default: Role.executor
     }
   },
   { timestamps: true },
