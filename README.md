@@ -44,6 +44,7 @@ npm run dev                 # http://localhost:3000
 | DELETE | `/api/boards/:id/statuses/:statusId` | admin (владелец) | удалить статус (если в нём нет задач) |
 | GET | `/api/tags` | авторизованные | список тегов |
 | POST | `/api/tags` | admin | создать тег |
+| POST | `/api/boards/:id/tasks` | admin (владелец) | создать задачу |
 
 Защищённые запросы: заголовок `Authorization: Bearer <token>`.
 

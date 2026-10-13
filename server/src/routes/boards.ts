@@ -9,6 +9,7 @@ import { isObjectId } from '../utils/objectId.js';
 import { userCanAccessBoard } from '../services/boardAccess.js';
 import { statusesRouter } from './statuses.js';
 import { Role } from '../constants/roles.js';
+import { boardTasksRouter } from './boardTasks.js';
 
 export const boardsRouter = Router();
 
@@ -17,6 +18,7 @@ boardsRouter.use(requireAuth);
 
 // Вложенные ресурсы доски, правила выше работают и на них
 boardsRouter.use('/:boardId/statuses', statusesRouter);
+boardsRouter.use('/:boardId/tasks', boardTasksRouter);
 
 const createBoardSchema = z.object({
   title: z.string().trim().min(1).max(100),
