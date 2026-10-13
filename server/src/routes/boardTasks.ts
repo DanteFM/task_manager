@@ -5,11 +5,11 @@ import { Status } from '../models/Status.js';
 import { Tag } from '../models/Tag.js';
 import { Task } from '../models/Task.js';
 import { User } from '../models/User.js';
-import { findOwnedBoard } from '../services/boardAccess.js';
-import { objectIdSchema } from '../utils/objectId.js';
+import { findOwnedBoard, userCanAccessBoard } from '../services/boardAccess.js';
+import { isObjectId, objectIdSchema } from '../utils/objectId.js';
 import { Priority } from '../constants/priorities.js';
 import { Role } from '../constants/roles.js';
-import { error } from 'node:console';
+import { Board } from '../models/Board.js';
 
 export const boardTasksRouter = Router({ mergeParams: true });
 
@@ -74,3 +74,45 @@ boardTasksRouter.post('/', requireRole(Role.admin), async(req, res) => {
 
   res.status(200).json(task);
 });
+
+const listTasksQuerySchema = z.object({
+  statusId: objectIdSchema.optional(),
+  assigneeId: objectIdSchema.optional(),
+  priority: z.enum(Priority).optional(),
+  tag: objectIdSchema.optional(),
+});
+
+// Задачи доски. Фильтры в query: ?statusId=...&priority=high&tag=...
+boardTasksRouter.get<{ boardId: string }>("/", async (req, res) => {
+  const { boardId } = req.params;
+  if (!isObjectId(boardId)) {
+    res.status(404).json({ message: 'Доска не найдена' });
+    return;
+  }
+
+  const board = await Board.findById(boardId);
+  if (!board || !(await userCanAccessBoard(req.user!, board))) {
+    res.status(404).json({ message: 'Доска не найдена' });
+    return;
+  }
+
+  const parsed = listTasksQuerySchema.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ message: 'Некорректные фильтры', errors: z.treeifyError(parsed.error) });
+    return;
+  }
+  const query = parsed.data;
+
+  const filter: Record<string, unknown> = { boardId: board._id };
+  if (query.statusId) filter.statusId = query.statusId;
+  if (query.priority) filter.priority = query.priority;
+  if (query.tag) filter.tags = query.tag;
+  if (req.user!.role === Role.executor) filter.assigneeId = req.user!.id;
+  else if (query.assigneeId) filter.assigneeId = query.assigneeId;
+
+  const tasks = await Task.find(filter)
+    .sort({ createdAt: -1 })
+    .populate('tags', 'name'); // подставить вместо id тегов сами теги (только поле name)
+
+  res.json(tasks);
+})
