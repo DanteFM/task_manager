@@ -7,7 +7,7 @@ import { authRouter } from "./routes/auth.js";
 import { requireAuth } from './middleware/auth.js';
 import { User } from './models/User.js';
 import { boardsRouter } from "./routes/boards.js";
-import { tagsRouter } from "./routes/routes.js";
+import { tagsRouter } from "./routes/tags.js";
 
 const app = express();
 
