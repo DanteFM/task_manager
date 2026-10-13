@@ -2,14 +2,13 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { requireRole } from '../middleware/auth.js';
 import { Status } from '../models/Status.js';
-import { Tag } from '../models/Tag.js';
 import { Task } from '../models/Task.js';
-import { User } from '../models/User.js';
 import { findOwnedBoard, userCanAccessBoard } from '../services/boardAccess.js';
 import { isObjectId, objectIdSchema } from '../utils/objectId.js';
 import { Priority } from '../constants/priorities.js';
 import { Role } from '../constants/roles.js';
 import { Board } from '../models/Board.js';
+import { allTagsExist, assigneeExists } from '../services/taskRefs.js';
 
 export const boardTasksRouter = Router({ mergeParams: true });
 
@@ -48,15 +47,13 @@ boardTasksRouter.post('/', requireRole(Role.admin), async(req, res) => {
     return;
   }
 
-  // Назначить можно только существующего исполнителя
-  if (data.assigneeId && !(await User.exists({ _id: data.assigneeId, role: Role.executor }))) {
+  if (data.assigneeId && !(await assigneeExists(data.assigneeId))) {
     res.status(400).json({ message: "Исполнитель не найден" })
     return;
   }
 
   const tagIds = [...new Set(data.tags)];
-  // Все теги должны существовать.
-  if (tagIds.length && (await Tag.countDocuments({ _id: { $in: tagIds } })) !== tagIds.length) {
+  if (!(await allTagsExist(tagIds))) {
     res.status(400).json({ message: "Некоторые теги не найдены" });
     return;
   }
