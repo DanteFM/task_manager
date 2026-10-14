@@ -95,3 +95,15 @@ tasksRouter.patch('/:taskId', requireRole('admin'), async (req, res) => {
 
   res.json(updated);
 });
+
+// Удалить задачу
+tasksRouter.delete('/:taskId', requireRole('admin'), async (req, res) => {
+  const task = await findOwnedTask(req.params.taskId, req.user!.id);
+  if (!task) {
+    res.status(404).json({ message: 'Задача не найдена' });
+    return;
+  }
+
+  await task.deleteOne();
+  res.status(204).end();
+});
