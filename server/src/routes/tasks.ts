@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { requireAuth } from '../middleware/auth.js';
+import { requireAuth, requireRole } from '../middleware/auth.js';
 import { Status } from '../models/Status.js';
 import { Task } from '../models/Task.js';
-import { canChangeTaskStatus } from '../services/taskAccess.js';
+import { canChangeTaskStatus, findOwnedTask } from '../services/taskAccess.js';
 import { isObjectId, objectIdSchema } from '../utils/objectId.js';
+import { assigneeExists, allTagsExist } from '../services/taskRefs.js';
+import { Priority } from '../constants/priorities.js';
 
 export const tasksRouter = Router();
 
@@ -46,6 +48,50 @@ tasksRouter.patch('/:taskId/status', async (req, res) => {
     { statusId: parsed.data.statusId },
     { new: true },
   );
+
+  res.json(updated);
+});
+
+const updateTaskSchema = z.object({
+  title: z.string().trim().min(1).max(200),
+  description: z.string().max(5000),
+  priority: z.enum(Priority),
+  assigneeId: objectIdSchema.nullable(), // null снимет исполнителя
+  tags: z.array(objectIdSchema).max(20),
+}).partial()
+.refine((data) => Object.keys(data).length > 0, { message: "Передайте хотя бы одно поле" });
+
+// Изменить задачу
+tasksRouter.patch('/:taskId', requireRole('admin'), async (req, res) => {
+  const task = await findOwnedTask(req.params.taskId, req.user!.id);
+  if (!task) {
+    res.status(404).json({ message: 'Задача не найдена' });
+    return;
+  }
+
+  const parsed = updateTaskSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ message: 'Некорректные данные', errors: z.treeifyError(parsed.error) });
+    return;
+  }
+  
+  const { tags, ...fields } = parsed.data;
+  if (fields.assigneeId && !(await assigneeExists(fields.assigneeId))) {
+    res.status(400).json({ message: "Исполнитель не найден" });
+    return;
+  }
+
+  const  tagIds = tags && [...new Set(tags)];
+  if (tagIds && !(await allTagsExist(tagIds))) {
+    res.status(400).json({ message: "Некоторые теги не найдены" });
+    return;
+  }
+
+  const updated = await Task.findByIdAndUpdate(
+    task._id,
+    { ...fields, ...(tagIds ? { tags: tagIds } : {})},
+    { returnDocument: "after" }
+  ).populate('tags', "name");
 
   res.json(updated);
 });
