@@ -71,7 +71,7 @@ statusesRouter.patch('/:statusId', requireRole(Role.admin), async (req, res) => 
   const status = await Status.findOneAndUpdate(
     { _id: statusId, boardId: board._id },
     { title },
-    { new: true } // вернуть после обновления, а не до
+    { returnDocument: 'after' } // вернуть после обновления, а не до
   );
 
   if (!status) {
