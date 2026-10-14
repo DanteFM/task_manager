@@ -46,6 +46,7 @@ npm run dev                 # http://localhost:3000
 | POST | `/api/tags` | admin | создать тег |
 | POST | `/api/boards/:id/tasks` | admin (владелец) | создать задачу |
 | GET | `/api/boards/:id/tasks` | с доступом к доске | задачи доски; фильтры `statusId`, `assigneeId`, `priority`, `tag`; исполнитель видит только свои |
+| PATCH | `/api/tasks/:taskId/status` | admin (владелец доски), исполнитель своей задачи | сменить статус задачи |
 
 Защищённые запросы: заголовок `Authorization: Bearer <token>`.
 

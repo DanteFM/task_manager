@@ -8,6 +8,7 @@ import { requireAuth } from './middleware/auth.js';
 import { User } from './models/User.js';
 import { boardsRouter } from "./routes/boards.js";
 import { tagsRouter } from "./routes/tags.js";
+import { tasksRouter } from "./routes/tasks.js";
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json()); // Превращает JSON из тела запрос
 app.use("/api/auth", authRouter);
 app.use('/api/boards', boardsRouter);
 app.use('/api/tags', tagsRouter);
+app.use('/api/tasks', tasksRouter);
 
 app.get('/health', (_req, res) => {
   res.json({ status: "ok" });
