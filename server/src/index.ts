@@ -10,12 +10,15 @@ import { boardsRouter } from "./routes/boards.js";
 import { tagsRouter } from "./routes/tags.js";
 import { tasksRouter } from "./routes/tasks.js";
 import cookieParser from "cookie-parser";
+import { checkOrigin } from "./middleware/originCheck.js";
 
 const app = express();
 
-app.use(cors()); // разрешаем кроссдоменные запросы
+app.use(cors({ origin: config.clientOrigin, credentials: true })); // разрешаем кроссдоменные запросы
 app.use(cookieParser()); // заполняет req.cookie
 app.use(express.json()); // Превращает JSON из тела запроса в объект и кладёт в req.body
+app.use(checkOrigin); // важен порядок - до роутов
+
 app.use("/api/auth", authRouter);
 app.use('/api/boards', boardsRouter);
 app.use('/api/tags', tagsRouter);
