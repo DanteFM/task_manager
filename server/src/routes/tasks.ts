@@ -46,7 +46,7 @@ tasksRouter.patch('/:taskId/status', async (req, res) => {
   const updated = await Task.findByIdAndUpdate(
     task._id,
     { statusId: parsed.data.statusId },
-    { new: true },
+    { returnDocument: "after" },
   );
 
   res.json(updated);
