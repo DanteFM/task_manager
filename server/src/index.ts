@@ -11,9 +11,13 @@ import { tagsRouter } from "./routes/tags.js";
 import { tasksRouter } from "./routes/tasks.js";
 import cookieParser from "cookie-parser";
 import { checkOrigin } from "./middleware/originCheck.js";
+import helmet from 'helmet';
 
 const app = express();
 
+// Выставляет безопасные заголовки (запрет подмены Content-Type, защита от iframe и др.)
+// и убирает заголовок X-Powered-By, который подсказывает атакующему, что за стек.
+app.use(helmet());
 app.use(cors({ origin: config.clientOrigin, credentials: true })); // разрешаем кроссдоменные запросы
 app.use(cookieParser()); // заполняет req.cookie
 app.use(express.json()); // Превращает JSON из тела запроса в объект и кладёт в req.body
