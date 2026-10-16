@@ -12,4 +12,7 @@ export const config = {
   clientOrigin: required('CLIENT_ORIGIN'),
   isProd: process.env.NODE_ENV === 'production',
   tokenTtlSeconds: 7 * 24 * 60 * 60, // Срок жизни токена и cookie один: 7 дней, в секундах
+  // Лимит запросов к /api/auth за 15 минут с одного IP. По умолчанию строгий,
+  // для разработки значение поднимается в .env
+  authRateLimit: Number(process.env.AUTH_RATE_LIMIT) || 20,
 };

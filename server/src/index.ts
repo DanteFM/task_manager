@@ -12,6 +12,7 @@ import { tasksRouter } from "./routes/tasks.js";
 import cookieParser from "cookie-parser";
 import { checkOrigin } from "./middleware/originCheck.js";
 import helmet from 'helmet';
+import { authLimiter } from './middleware/rateLimit.js';
 
 const app = express();
 
@@ -23,7 +24,7 @@ app.use(cookieParser()); // заполняет req.cookie
 app.use(express.json()); // Превращает JSON из тела запроса в объект и кладёт в req.body
 app.use(checkOrigin); // важен порядок - до роутов
 
-app.use("/api/auth", authRouter);
+app.use("/api/auth", authLimiter, authRouter);
 app.use('/api/boards', boardsRouter);
 app.use('/api/tags', tagsRouter);
 app.use('/api/tasks', tasksRouter);
