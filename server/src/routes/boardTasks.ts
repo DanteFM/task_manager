@@ -69,7 +69,7 @@ boardTasksRouter.post('/', requireRole(Role.admin), async(req, res) => {
     tags: tagIds,
   });
 
-  res.status(200).json(task);
+  res.status(201).json(task);
 });
 
 const listTasksQuerySchema = z.object({
