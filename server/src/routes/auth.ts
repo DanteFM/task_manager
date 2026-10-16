@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import { config } from '../config.js';
 import { User } from '../models/User.js';
+import { setAuthCookie, clearAuthCookie } from '../utils/authCookie.js';
 
 export const authRouter = Router();
 
@@ -33,6 +34,8 @@ authRouter.post("/register", async (req, res) => {
 
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await User.create({ email, passwordHash });
+  const token = signToken(user.id, user.role);
+  setAuthCookie(res, token);
 
   res.status(201).json({
     token: signToken(user.id, user.role),
@@ -58,8 +61,15 @@ authRouter.post("/login", async (req, res) => {
     return;
   }
 
+  const token = signToken(user.id, user.role);
+  setAuthCookie(res, token);
+
   res.json({
-    token: signToken(user.id, user.role),
     user: { id: user.id, email: user.email, role: user.role }
   });
+});
+
+authRouter.post('/logout', (_req, res) => {
+  clearAuthCookie(res);
+  res.status(204).end();
 });
