@@ -24,14 +24,14 @@ app.get('/health', (_req, res) => {
 });
 
 app.get("/api/me", requireAuth, async (req, res) => {
-  const user = await User.findById(req.user!.id).select("~passwordHash");
+  const user = await User.findById(req.user!.id);
 
   if (!user) {
     res.status(401).json({ message: "Пользователь не найден" });
     return;
   }
   
-  res.json(user);
+  res.json({ id: user.id, email: user.email, role: user.role });
 })
 
 async function start() {
