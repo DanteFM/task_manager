@@ -9,10 +9,12 @@ import { User } from './models/User.js';
 import { boardsRouter } from "./routes/boards.js";
 import { tagsRouter } from "./routes/tags.js";
 import { tasksRouter } from "./routes/tasks.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
 app.use(cors()); // разрешаем кроссдоменные запросы
+app.use(cookieParser()); // заполняет req.cookie
 app.use(express.json()); // Превращает JSON из тела запроса в объект и кладёт в req.body
 app.use("/api/auth", authRouter);
 app.use('/api/boards', boardsRouter);
