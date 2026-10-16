@@ -14,7 +14,7 @@ const credentialsSchema = z.object({
 })
 
 function signToken(userId: string, role: string): string {
-  return jwt.sign({ sub: userId, role }, config.jwtSecret, {expiresIn: "7d" });
+  return jwt.sign({ sub: userId, role }, config.jwtSecret, {expiresIn: config.tokenTtlSeconds });
 }
 
 authRouter.post("/register", async (req, res) => {
