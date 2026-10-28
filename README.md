@@ -6,19 +6,29 @@
 ## Стек (стадия 1)
 
 - Backend: Node.js, Express 5, TypeScript, MongoDB (Mongoose), zod, JWT
-- Frontend: React, Ant Design (в работе)
+- Frontend: React, Ant Design
 - Окружение: Docker Compose (MongoDB для разработки)
 
 ## Быстрый старт
+
+### Сервер
 
 ```bash
 docker compose up -d        # MongoDB
 
 cd server
 npm ci
-cp .env.example .env        # заполнить значения
+cp .env.example .env        # заполнить значения (в cmd на Windows: copy)
 npm run seed:admin          # создать администратора
 npm run dev                 # http://localhost:3000
+```
+
+### Клиент
+
+```bash
+cd client
+npm ci
+npm run dev                 # http://localhost:5173
 ```
 
 ### Переменные окружения (`server/.env`)
