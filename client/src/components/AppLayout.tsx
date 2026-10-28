@@ -24,7 +24,7 @@ export default function AppLayout() {
   });
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '95vh' }}>
       <Layout.Header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Link to="/" style={{ color: '#fff', fontWeight: 600 }}>
           Task Manager

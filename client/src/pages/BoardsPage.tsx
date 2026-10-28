@@ -1,18 +1,28 @@
-import { Alert, Card, Col, Empty, Row, Skeleton, Typography } from 'antd';
+import { Alert, Button, Card, Col, Empty, Flex, Row, Skeleton, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import { useBoards } from '../hooks/useBoards';
 import { useMe } from '../hooks/useMe';
+import { useState } from 'react';
+import CreateBoardModal from '../components/CreateBoardModal';
 
 export default function BoardsPage() {
   const { data: user } = useMe();
   const { data: boards, isPending, error } = useBoards();
+  const [modalOpen, setModalOpen] = useState(false)
   const isAdmin = user?.role === 'admin';
 
   return (
     <>
-      <Typography.Title level={3} style={{ marginTop: 0 }}>
-        Доски
-      </Typography.Title>
+      <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
+        <Typography.Title level={3} style={{ margin: 0 }}>
+          Доски
+        </Typography.Title>
+        {isAdmin && (
+          <Button type="primary" onClick={() => setModalOpen(true)}>
+            Создать доску
+          </Button>
+        )}
+      </Flex>
 
       {error && <Alert type="error" showIcon title={error.message} />}
       {isPending && <Skeleton active />}
@@ -39,6 +49,8 @@ export default function BoardsPage() {
           ))}
         </Row>
       )}
+
+      <CreateBoardModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </>
   );
 }
