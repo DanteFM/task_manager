@@ -16,7 +16,7 @@ export default function AuthPage({ mode }: Props) {
   const submit = useMutation({
     mutationFn: (data: Credentials) => (isLogin ? authApi.login(data) : authApi.register(data)),
     // перезапрашиваем /me для получения инфы по пользователю, т.к. куки с токеном уже поставлены сервером
-    onSuccess: async () => queryClient.fetchQuery({ ...meQueryOptions, staleTime: 0 }),
+    onSuccess: async () => queryClient.query({ ...meQueryOptions, staleTime: 0 }),
   });
 
   if (user) return <Navigate to="/" replace />;
