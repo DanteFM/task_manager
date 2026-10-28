@@ -1,7 +1,8 @@
 import { Alert, Button, Card, Form, Input } from 'antd';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate  } from 'react-router-dom';
 import { authApi, type Credentials } from '../api/auth';
+import { meQueryOptions, useMe } from '../hooks/useMe';
 
 interface Props {
   mode: 'login' | 'register';
@@ -9,17 +10,16 @@ interface Props {
 
 export default function AuthPage({ mode }: Props) {
   const isLogin = mode === "login";
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { data: user } = useMe();
 
   const submit = useMutation({
     mutationFn: (data: Credentials) => (isLogin ? authApi.login(data) : authApi.register(data)),
     // перезапрашиваем /me для получения инфы по пользователю, т.к. куки с токеном уже поставлены сервером
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['me'] });
-      navigate('/');
-    },
+    onSuccess: async () => queryClient.fetchQuery({ ...meQueryOptions, staleTime: 0 }),
   });
+
+  if (user) return <Navigate to="/" replace />;
 
   return(
     <Card title={isLogin ? 'Вход' : 'Регистрация'} style={{ width: 360, margin: '15vh auto 0' }}>
