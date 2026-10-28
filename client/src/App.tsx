@@ -2,7 +2,8 @@ import { Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicOnlyRoute from './components/PublicOnlyRoute';
 import AuthPage from './pages/AuthPage';
-import HomePage from './pages/HomePage';
+import BoardsPage from './pages/BoardsPage';
+import AppLayout from './components/AppLayout';
 
 export default function App() {
   return (
@@ -12,7 +13,9 @@ export default function App() {
         <Route path="/register" element={<AuthPage mode="register" />} />
       </Route>
       <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<HomePage />} />
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<BoardsPage />} />
+        </Route>
       </Route>
     </Routes>
   );
