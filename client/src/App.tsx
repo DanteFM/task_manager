@@ -4,6 +4,7 @@ import PublicOnlyRoute from './components/PublicOnlyRoute';
 import AuthPage from './pages/AuthPage';
 import BoardsPage from './pages/BoardsPage';
 import AppLayout from './components/AppLayout';
+import BoardPage from './pages/BoardPage';
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/" element={<BoardsPage />} />
+          <Route path="/boards/:boardId" element={<BoardPage />} />
         </Route>
       </Route>
     </Routes>
