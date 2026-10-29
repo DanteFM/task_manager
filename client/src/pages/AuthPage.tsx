@@ -24,7 +24,7 @@ export default function AuthPage({ mode }: Props) {
   return(
     <Card title={isLogin ? 'Вход' : 'Регистрация'} style={{ width: 360, margin: '15vh auto 0' }}>
       {submit.error && (
-        <Alert type="error" showIcon message={submit.error.message} style={{ marginBottom: 16 }} />
+        <Alert type="error" showIcon title={submit.error.message} style={{ marginBottom: 16 }} />
       )}
       <Form<Credentials> layout="vertical" onFinish={(values) => submit.mutate(values)}>
         <Form.Item

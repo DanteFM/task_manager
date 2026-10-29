@@ -26,7 +26,7 @@ export default function CreateBoardModal({ open, onClose }: Props) {
       onOk={() => form.submit()}
       onCancel={close}
     >
-      {create.error && <Alert type="error" showIcon message={create.error.message} style={{ marginBottom: 16 }} />}
+      {create.error && <Alert type="error" showIcon title={create.error.message} style={{ marginBottom: 16 }} />}
       <Form
         form={form}
         layout="vertical"
