@@ -14,3 +14,7 @@ export function useCreateBoard() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['boards'] }),
   });
 }
+
+export function useBoard(boardId: string) {
+  return useQuery({ queryKey: ['boards', boardId], queryFn: () => boardsApi.get(boardId) });
+}
