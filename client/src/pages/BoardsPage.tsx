@@ -4,12 +4,13 @@ import { useBoards } from '../hooks/useBoards';
 import { useMe } from '../hooks/useMe';
 import { useState } from 'react';
 import CreateBoardModal from '../components/CreateBoardModal';
+import { isAdmin } from '../utils/permissions';
 
 export default function BoardsPage() {
   const { data: user } = useMe();
   const { data: boards, isPending, error } = useBoards();
   const [modalOpen, setModalOpen] = useState(false)
-  const isAdmin = user?.role === 'admin';
+  const admin = isAdmin(user);
 
   return (
     <>
@@ -17,7 +18,7 @@ export default function BoardsPage() {
         <Typography.Title level={3} style={{ margin: 0 }}>
           Доски
         </Typography.Title>
-        {isAdmin && (
+        {admin && (
           <Button type="primary" onClick={() => setModalOpen(true)}>
             Создать доску
           </Button>
@@ -29,7 +30,7 @@ export default function BoardsPage() {
 
       {boards?.length === 0 && (
         <Empty
-          description={isAdmin ? 'Досок пока нет' : 'Вам пока не назначены задачи ни на одной доске'}
+          description={admin ? 'Досок пока нет' : 'Вам пока не назначены задачи ни на одной доске'}
         />
       )}
 
