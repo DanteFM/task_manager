@@ -9,13 +9,14 @@ import {
 } from '@dnd-kit/core';
 import { Alert, Button, Flex, Result, Skeleton, Typography } from 'antd';
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ApiError } from '../api/http';
 import type { Task } from '../api/types';
 import BoardColumn from '../components/BoardColumn';
 import TaskCard from '../components/TaskCard';
 import { useBoard } from '../hooks/useBoards';
 import { useBoardTasks, useMoveTask } from '../hooks/useTasks';
+import TaskDrawer from '../components/TaskDrawer';
 
 export default function BoardPage() {
   const { boardId = '' } = useParams<{ boardId: string }>();
@@ -24,6 +25,9 @@ export default function BoardPage() {
   const moveTask = useMoveTask(boardId);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [skipDropAnimation, setSkipDropAnimation] = useState(false);
+  // Открытая задача хранится в адресе (?task=id): обновление страницы её не закрывает
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedTaskId = searchParams.get('task');
 
   // Перетаскивание начинается после смещения на 8px: так обычный клик по карточке
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
@@ -49,6 +53,12 @@ export default function BoardPage() {
   const { board, statuses } = boardQuery.data;
   const tasks = tasksQuery.data;
   const columns = [...statuses].sort((a, b) => a.order - b.order);
+  // Если задачи с таким id нет в списке (удалена, чужая, опечатка в адресе), панель просто не открывается
+  const selectedTask = tasks.find((task) => task._id === selectedTaskId) ?? null;
+  // Открываем с новой записью в истории, чтобы «Назад» закрывал панель;
+  // закрываем с заменой записи, иначе «Назад» открывал бы её снова.
+  const openTask = (taskId: string) => setSearchParams({ task: taskId });
+  const closeTask = () => setSearchParams({}, { replace: true });
 
   // Раскладываем задачи по статусам один раз, а не фильтруем для каждой колонки
   const tasksByStatus = new Map<string, Task[]>();
@@ -98,7 +108,12 @@ export default function BoardPage() {
       >
         <Flex gap={16} align="flex-start" style={{ overflowX: 'auto', paddingBottom: 8 }}>
           {columns.map((status) => (
-            <BoardColumn key={status._id} status={status} tasks={tasksByStatus.get(status._id) ?? []} />
+            <BoardColumn
+              key={status._id}
+              status={status}
+              tasks={tasksByStatus.get(status._id) ?? []}
+              onTaskClick={openTask}
+            />
           ))}
         </Flex>
 
@@ -107,6 +122,7 @@ export default function BoardPage() {
           {activeTask && <TaskCard task={activeTask} />}
         </DragOverlay>
       </DndContext>
+      <TaskDrawer task={selectedTask} statuses={columns} onClose={closeTask} />
     </>
   );
 }

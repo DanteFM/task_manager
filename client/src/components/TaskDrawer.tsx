@@ -19,7 +19,7 @@ export default function TaskDrawer({ task, statuses, onClose }: Props) {
   const view = task ?? lastTask;
 
     return (
-    <Drawer open={task !== null} onClose={onClose} title={view?.title} width={480}>
+    <Drawer open={task !== null} onClose={onClose} title={view?.title} size={480}>
       {view && (
         <>
           <Descriptions

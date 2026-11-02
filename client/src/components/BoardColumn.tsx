@@ -6,9 +6,10 @@ import DraggableTaskCard from './DraggableTaskCard';
 interface Props {
   status: Status;
   tasks: Task[];
+  onTaskClick: (taskId: string) => void;
 }
 
-export default function BoardColumn({ status, tasks }: Props) {
+export default function BoardColumn({ status, tasks, onTaskClick }: Props) {
   const { token } = theme.useToken();
   // Колонка принимает карточки; id колонки равен id статуса
   const { setNodeRef, isOver } = useDroppable({ id: status._id });
@@ -33,7 +34,7 @@ export default function BoardColumn({ status, tasks }: Props) {
 
       <Flex vertical gap={8}>
         {tasks.map((task) => (
-          <DraggableTaskCard key={task._id} task={task} />
+          <DraggableTaskCard key={task._id} task={task} onClick={() => onTaskClick(task._id)} />
         ))}
         {tasks.length === 0 && <Typography.Text type="secondary">Нет задач</Typography.Text>}
       </Flex>
