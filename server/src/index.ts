@@ -13,6 +13,7 @@ import cookieParser from "cookie-parser";
 import { checkOrigin } from "./middleware/originCheck.js";
 import helmet from 'helmet';
 import { authLimiter } from './middleware/rateLimit.js';
+import usersRouter from './routes/users.js';
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use("/api/auth", authLimiter, authRouter);
 app.use('/api/boards', boardsRouter);
 app.use('/api/tags', tagsRouter);
 app.use('/api/tasks', tasksRouter);
+app.use('/api/users', usersRouter);
 
 app.get('/health', (_req, res) => {
   res.json({ status: "ok" });

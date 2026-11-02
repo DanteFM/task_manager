@@ -68,6 +68,7 @@ npm run dev                 # http://localhost:5173
 | PATCH | `/api/tasks/:taskId/status` | admin (владелец доски), исполнитель своей задачи | сменить статус задачи |
 | PATCH | `/api/tasks/:taskId` | admin (владелец доски) | изменить задачу (title, description, priority, assigneeId, tags) |
 | DELETE | `/api/tasks/:taskId` | admin (владелец доски) | удалить задачу |
+| GET | `/users` | admin | список пользователей `{ id, email, role }`, фильтр `?role=executor` |
 
 ## Роли и права
 
