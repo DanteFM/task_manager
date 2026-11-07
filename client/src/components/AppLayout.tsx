@@ -4,6 +4,7 @@ import { Link, Outlet } from 'react-router-dom';
 import { authApi } from '../api/auth';
 import type { Role } from '../api/types';
 import { useMe } from '../hooks/useMe';
+import { fullName } from '../utils/userName';
 
 const ROLE_LABEL: Record<Role, string> = {
   admin: 'Администратор',
@@ -30,7 +31,7 @@ export default function AppLayout() {
           Task Manager
         </Link>
         <Space>
-          <Typography.Text style={{ color: '#fff' }}>{user?.email}</Typography.Text>
+          <Typography.Text style={{ color: '#fff' }}>{user && fullName(user)}</Typography.Text>
           {user && <Tag>{ROLE_LABEL[user.role]}</Tag>}
           <Button onClick={() => logout.mutate()} loading={logout.isPending}>
             Выйти

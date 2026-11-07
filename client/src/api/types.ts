@@ -6,6 +6,8 @@ export interface User {
   id: string;
   email: string;
   role: Role;
+  firstName: string | null; // у админа из seed и старых пользователей имени нет
+  lastName: string | null;
 }
 
 export interface Board {
