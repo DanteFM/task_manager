@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
-import { tasksApi, type TaskInput } from '../api/tasks';
+import { tasksApi, type TaskInput, type TaskUpdate } from '../api/tasks';
 import type { Task } from '../api/types';
 
 export function useBoardTasks(boardId: string) {
@@ -46,5 +46,22 @@ export function useCreateTask(boardId: string) {
     mutationFn: (data: TaskInput) => tasksApi.create(boardId, data),
     // Возвращаем промис: форма закроется только после того, как карточка уже появилась на доске
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['boards', boardId, 'tasks'] }),
+  });
+}
+
+export function useUpdateTask(boardId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, data }: { taskId: string; data: TaskUpdate }) => tasksApi.update(taskId, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['boards', boardId, 'tasks'] }),
+  });
+}
+
+export function useDeleteTask(boardId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (taskId: string) => tasksApi.remove(taskId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['boards', boardId, 'tasks'] }),
+    onError: (error) => message.error(error.message),
   });
 }
