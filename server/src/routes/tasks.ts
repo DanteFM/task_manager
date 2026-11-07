@@ -7,6 +7,7 @@ import { canChangeTaskStatus, findOwnedTask } from '../services/taskAccess.js';
 import { isObjectId, objectIdSchema } from '../utils/objectId.js';
 import { assigneeExists, allTagsExist } from '../services/taskRefs.js';
 import { Priority } from '../constants/priorities.js';
+import { Role } from '../constants/roles.js';
 
 export const tasksRouter = Router();
 
@@ -62,7 +63,7 @@ const updateTaskSchema = z.object({
 .refine((data) => Object.keys(data).length > 0, { message: "Передайте хотя бы одно поле" });
 
 // Изменить задачу
-tasksRouter.patch('/:taskId', requireRole('admin'), async (req, res) => {
+tasksRouter.patch('/:taskId', requireRole(Role.admin), async (req, res) => {
   const task = await findOwnedTask(req.params.taskId, req.user!.id);
   if (!task) {
     res.status(404).json({ message: 'Задача не найдена' });
@@ -97,7 +98,7 @@ tasksRouter.patch('/:taskId', requireRole('admin'), async (req, res) => {
 });
 
 // Удалить задачу
-tasksRouter.delete('/:taskId', requireRole('admin'), async (req, res) => {
+tasksRouter.delete('/:taskId', requireRole(Role.admin), async (req, res) => {
   const task = await findOwnedTask(req.params.taskId, req.user!.id);
   if (!task) {
     res.status(404).json({ message: 'Задача не найдена' });
