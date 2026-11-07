@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { config } from '../config.js';
 import { User } from '../models/User.js';
 import { setAuthCookie, clearAuthCookie } from '../utils/authCookie.js';
+import { toPublicUser } from '../utils/publicUser.js';
 
 export const authRouter = Router();
 
@@ -39,7 +40,7 @@ authRouter.post("/register", async (req, res) => {
 
   res.status(201).json({
     token: signToken(user.id, user.role),
-    user: { id: user.id, email: user.email, role: user.role }
+    user: toPublicUser(user)
   });
 });
 
@@ -65,7 +66,7 @@ authRouter.post("/login", async (req, res) => {
   setAuthCookie(res, token);
 
   res.json({
-    user: { id: user.id, email: user.email, role: user.role }
+    user: toPublicUser(user)
   });
 });
 

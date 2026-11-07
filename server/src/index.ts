@@ -14,6 +14,7 @@ import { checkOrigin } from "./middleware/originCheck.js";
 import helmet from 'helmet';
 import { authLimiter } from './middleware/rateLimit.js';
 import usersRouter from './routes/users.js';
+import { toPublicUser } from "./utils/publicUser.js";
 
 const app = express();
 
@@ -43,7 +44,7 @@ app.get("/api/me", requireAuth, async (req, res) => {
     return;
   }
   
-  res.json({ id: user.id, email: user.email, role: user.role });
+  res.json(toPublicUser(user));
 })
 
 async function start() {
