@@ -7,7 +7,6 @@ import { useExecutors } from '../hooks/useUsers';
 import { userLabel } from '../utils/userName';
 
 interface Props {
-  open: boolean;
   onClose: () => void;
   boardId: string;
   statuses: Status[];
@@ -27,19 +26,12 @@ const PRIORITY_OPTIONS = (Object.keys(PRIORITY_META) as Priority[]).map((value) 
   label: PRIORITY_META[value].label,
 }));
 
-export default function CreateTaskModal({ open, onClose, boardId, statuses }: Props) {
+export default function CreateTaskModal({ onClose, boardId, statuses }: Props) {
   const [form] = Form.useForm<FormValues>();
   const create = useCreateTask(boardId);
   // Списки грузятся только пока форма открыта
-  const executors = useExecutors(open);
-  const tags = useTags(open);
-
-  // Закрытие с очисткой: введённое и ошибка не должны переходить в следующее открытие
-  const close = () => {
-    form.resetFields();
-    create.reset();
-    onClose();
-  };
+  const executors = useExecutors(true);
+  const tags = useTags(true);
 
   const handleFinish = (values: FormValues) => {
     create.mutate(
@@ -51,7 +43,7 @@ export default function CreateTaskModal({ open, onClose, boardId, statuses }: Pr
         assigneeId: values.assigneeId, // undefined: исполнитель не выбран
         tags: values.tags ?? [],
       },
-      { onSuccess: close },
+      { onSuccess: onClose },
     );
   };
 
@@ -60,12 +52,12 @@ export default function CreateTaskModal({ open, onClose, boardId, statuses }: Pr
   return (
     <Modal
       title="Новая задача"
-      open={open}
+      open
       okText="Создать"
       cancelText="Отмена"
       confirmLoading={create.isPending}
       onOk={() => form.submit()}
-      onCancel={close}
+      onCancel={onClose}
     >
       {create.error && <Alert type="error" showIcon message={create.error.message} style={{ marginBottom: 16 }} />}
       {listsError && (

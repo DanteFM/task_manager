@@ -17,7 +17,7 @@ import TaskCard from '../components/TaskCard';
 import { useBoard } from '../hooks/useBoards';
 import { useBoardTasks, useMoveTask } from '../hooks/useTasks';
 import TaskDrawer from '../components/TaskDrawer';
-import CreateTaskModal from '../components/CreateTaskModal';
+import TaskFormModal from '../components/TaskFormModal';
 import { useMe } from '../hooks/useMe';
 import { isAdmin } from '../utils/permissions';
 
@@ -137,13 +137,8 @@ export default function BoardPage() {
         </DragOverlay>
       </DndContext>
       <TaskDrawer task={selectedTask} statuses={columns} onClose={closeTask} />
-      {admin && (
-        <CreateTaskModal
-          open={taskModalOpen}
-          onClose={() => setTaskModalOpen(false)}
-          boardId={boardId}
-          statuses={columns}
-        />
+      {admin && taskModalOpen && (
+        <TaskFormModal onClose={() => setTaskModalOpen(false)} boardId={boardId} statuses={columns} />
       )}
     </>
   );
