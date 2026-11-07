@@ -10,8 +10,8 @@ export default function App() {
   return (
     <Routes>
       <Route element={<PublicOnlyRoute />}>
-        <Route path="/login" element={<AuthPage mode="login" />} />
-        <Route path="/register" element={<AuthPage mode="register" />} />
+        <Route path="/login" element={<AuthPage mode="login" key="login" />} />
+        <Route path="/register" element={<AuthPage mode="register" key="register" />} />
       </Route>
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
