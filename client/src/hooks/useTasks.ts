@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { message } from 'antd';
-import { tasksApi } from '../api/tasks';
+import { tasksApi, type TaskInput } from '../api/tasks';
 import type { Task } from '../api/types';
 
 export function useBoardTasks(boardId: string) {
@@ -37,5 +37,14 @@ export function useMoveTask(boardId: string) {
 
     // В любом случае сверяемся с сервером
     onSettled: () => queryClient.invalidateQueries({ queryKey: tasksKey }),
+  });
+}
+
+export function useCreateTask(boardId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: TaskInput) => tasksApi.create(boardId, data),
+    // Возвращаем промис: форма закроется только после того, как карточка уже появилась на доске
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['boards', boardId, 'tasks'] }),
   });
 }
