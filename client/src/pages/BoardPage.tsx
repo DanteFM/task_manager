@@ -17,6 +17,9 @@ import TaskCard from '../components/TaskCard';
 import { useBoard } from '../hooks/useBoards';
 import { useBoardTasks, useMoveTask } from '../hooks/useTasks';
 import TaskDrawer from '../components/TaskDrawer';
+import CreateTaskModal from '../components/CreateTaskModal';
+import { useMe } from '../hooks/useMe';
+import { isAdmin } from '../utils/permissions';
 
 export default function BoardPage() {
   const { boardId = '' } = useParams<{ boardId: string }>();
@@ -31,6 +34,10 @@ export default function BoardPage() {
 
   // Перетаскивание начинается после смещения на 8px: так обычный клик по карточке
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+
+  const { data: user } = useMe();
+  const admin = isAdmin(user);
+  const [taskModalOpen, setTaskModalOpen] = useState(false);
 
   const error = boardQuery.error ?? tasksQuery.error;
   if (error instanceof ApiError && error.status === 404) {
@@ -93,11 +100,18 @@ export default function BoardPage() {
 
   return (
     <>
-      <Flex align="center" gap={12} style={{ marginBottom: 16 }}>
-        <Link to="/">← Доски</Link>
-        <Typography.Title level={3} style={{ margin: 0 }}>
-          {board.title}
-        </Typography.Title>
+      <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
+        <Flex align="center" gap={12}>
+          <Link to="/">← Доски</Link>
+          <Typography.Title level={3} style={{ margin: 0 }}>
+            {board.title}
+          </Typography.Title>
+        </Flex>
+        {admin && (
+          <Button type="primary" onClick={() => setTaskModalOpen(true)}>
+            Новая задача
+          </Button>
+        )}
       </Flex>
 
       <DndContext
@@ -123,6 +137,14 @@ export default function BoardPage() {
         </DragOverlay>
       </DndContext>
       <TaskDrawer task={selectedTask} statuses={columns} onClose={closeTask} />
+      {admin && (
+        <CreateTaskModal
+          open={taskModalOpen}
+          onClose={() => setTaskModalOpen(false)}
+          boardId={boardId}
+          statuses={columns}
+        />
+      )}
     </>
   );
 }
