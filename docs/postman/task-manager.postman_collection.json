@@ -18,7 +18,9 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Статус ответа: 201 или 409\", () => pm.expect([201, 409]).to.include(pm.response.code));",
-                  "pm.test(\"При 201: роль executor, хеш пароля не отдаётся\", () => { if (pm.response.code !== 201) return; const body = pm.response.json(); pm.expect(body.user.role).to.eql('executor'); pm.expect(JSON.stringify(body)).to.not.include('passwordHash'); });"
+                  "pm.test(\"При 201: роль executor, хеш пароля не отдаётся\", () => { if (pm.response.code !== 201) return; const body = pm.response.json(); pm.expect(body.user.role).to.eql('executor'); pm.expect(JSON.stringify(body)).to.not.include('passwordHash'); });",
+                  "pm.test(\"При 201: токен только в httpOnly-cookie, в теле его нет\", () => { if (pm.response.code !== 201) return; const sc = pm.response.headers.get('Set-Cookie') || ''; pm.expect(sc).to.include('HttpOnly'); pm.expect(pm.response.json()).to.not.have.property('token'); });",
+                  "pm.test(\"При 201: имя и фамилия сохранены и вернулись в ответе\", () => { if (pm.response.code !== 201) return; const body = pm.response.json(); pm.expect(body.user.firstName).to.eql('Тест'); pm.expect(body.user.lastName).to.eql('Исполнитель'); });"
                 ]
               }
             }
@@ -31,7 +33,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{executorEmail}}\",\n  \"password\": \"{{executorPassword}}\"\n}",
+              "raw": "{\n  \"email\": \"{{executorEmail}}\",\n  \"password\": \"{{executorPassword}}\",\n  \"firstName\": \"Тест\",\n  \"lastName\": \"Исполнитель\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -76,7 +78,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{executorEmail}}\",\n  \"password\": \"{{executorPassword}}\"\n}",
+              "raw": "{\n  \"email\": \"{{executorEmail}}\",\n  \"password\": \"{{executorPassword}}\",\n  \"firstName\": \"Тест\",\n  \"lastName\": \"Исполнитель\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -122,7 +124,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"weak@mail.test\",\n  \"password\": \"123\"\n}",
+              "raw": "{\n  \"email\": \"weak@mail.test\",\n  \"password\": \"123\",\n  \"firstName\": \"Тест\",\n  \"lastName\": \"Исполнитель\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -167,7 +169,98 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"not-an-email\",\n  \"password\": \"test1234\"\n}",
+              "raw": "{\n  \"email\": \"not-an-email\",\n  \"password\": \"test1234\",\n  \"firstName\": \"Тест\",\n  \"lastName\": \"Исполнитель\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "response": []
+        },
+        {
+          "name": "Регистрация: без имени и фамилии",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Статус ответа 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Ошибки по обоим полям\", () => { const e = JSON.stringify(pm.response.json().errors); pm.expect(e).to.include('firstName'); pm.expect(e).to.include('lastName'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"noname@mail.test\",\n  \"password\": \"test1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "protocolProfileBehavior": {
+            "disableCookies": true
+          },
+          "response": []
+        },
+        {
+          "name": "Регистрация: имя из одних пробелов",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Статус ответа 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"blank@mail.test\",\n  \"password\": \"test1234\",\n  \"firstName\": \"   \",\n  \"lastName\": \"Исполнитель\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -222,7 +315,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{uniqEmail}}\",\n  \"password\": \"test1234\",\n  \"role\": \"admin\"\n}",
+              "raw": "{\n  \"email\": \"{{uniqEmail}}\",\n  \"password\": \"test1234\",\n  \"firstName\": \"Тест\",\n  \"lastName\": \"Исполнитель\",\n  \"role\": \"admin\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -553,7 +646,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Статус ответа 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Роль admin, хеша нет\", () => { const body = pm.response.json(); pm.expect(body.role).to.eql('admin'); pm.expect(body).to.not.have.property('passwordHash'); });"
+                  "pm.test(\"Роль admin, хеша нет, поля имени присутствуют (у админа из seed они null)\", () => { const body = pm.response.json(); pm.expect(body.role).to.eql('admin'); pm.expect(body).to.not.have.property('passwordHash'); pm.expect(body).to.have.property('firstName'); pm.expect(body).to.have.property('lastName'); });"
                 ]
               }
             }
@@ -596,7 +689,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Статус ответа 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Роль executor, хеша нет\", () => { const body = pm.response.json(); pm.expect(body.role).to.eql('executor'); pm.expect(body).to.not.have.property('passwordHash'); });"
+                  "pm.test(\"Роль executor, хеша нет, поля имени присутствуют\", () => { const body = pm.response.json(); pm.expect(body.role).to.eql('executor'); pm.expect(body).to.not.have.property('passwordHash'); pm.expect(body).to.have.property('firstName'); pm.expect(body).to.have.property('lastName'); });"
                 ]
               }
             }
@@ -4942,7 +5035,7 @@
                 "exec": [
                   "pm.test(\"Статус ответа 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Оба тестовых пользователя в списке\", () => { const users = pm.response.json(); const ids = users.map((x) => x.id); pm.expect(ids).to.include(pm.collectionVariables.get('adminId')); pm.expect(ids).to.include(pm.collectionVariables.get('executorId')); });",
-                  "pm.test(\"Только id, email, role (хеша пароля нет)\", () => { pm.response.json().forEach((x) => pm.expect(Object.keys(x).sort()).to.eql(['email', 'id', 'role'])); });"
+                  "pm.test(\"Только id, email, role, firstName, lastName (хеша пароля нет)\", () => { pm.response.json().forEach((x) => pm.expect(Object.keys(x).sort()).to.eql(['email', 'firstName', 'id', 'lastName', 'role'])); });"
                 ]
               }
             }

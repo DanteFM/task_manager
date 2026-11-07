@@ -15,7 +15,7 @@ router.get('/', requireAuth, requireRole(Role.admin), async (req, res) => {
   }
 
   const filter = parsed.data.role ? { role: parsed.data.role } : {};
-  const users = await User.find(filter).select("email role").sort({ email: 1 });
+  const users = await User.find(filter).select("email role firstName lastName").sort({ lastName: 1, firstName: 1, email: 1 });
 
   res.json(users.map((user) => (toPublicUser(user))))
 });

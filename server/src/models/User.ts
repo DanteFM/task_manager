@@ -5,6 +5,8 @@ export interface IUser {
   email: string;
   passwordHash: string;
   role: Role;
+  firstName?: string;
+  lastName?: string;
 }
 
 const userSchema = new Schema<IUser>(
@@ -24,7 +26,9 @@ const userSchema = new Schema<IUser>(
       type: String,
       enum: Role,
       default: Role.executor
-    }
+    },
+    firstName: { type: String, trim: true },
+    lastName: { type: String, trim: true },
   },
   { timestamps: true },
 );

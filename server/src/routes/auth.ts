@@ -9,46 +9,48 @@ import { toPublicUser } from '../utils/publicUser.js';
 
 export const authRouter = Router();
 
-// схема того, что ждем от клиента
 const credentialsSchema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email()),
   password: z.string().min(8).max(72),
-})
+});
+
+const registerSchema = credentialsSchema.extend({
+  firstName: z.string().trim().min(1, 'Укажите имя').max(50),
+  lastName: z.string().trim().min(1, 'Укажите фамилию').max(50),
+});
 
 function signToken(userId: string, role: string): string {
-  return jwt.sign({ sub: userId, role }, config.jwtSecret, {expiresIn: config.tokenTtlSeconds });
+  return jwt.sign({ sub: userId, role }, config.jwtSecret, { expiresIn: config.tokenTtlSeconds });
 }
 
 authRouter.post("/register", async (req, res) => {
-  const parsed = credentialsSchema.safeParse(req.body);
+  const parsed = registerSchema.safeParse(req.body);
 
   if (!parsed.success) {
     res.status(400).json({ message: "Некорректные данные", errors: z.treeifyError(parsed.error) });
     return;
   }
 
-  const { email, password } = parsed.data;
+  const { email, password, firstName, lastName } = parsed.data;
 
   if (await User.exists({ email })) {
-    res.status(409).json({ message: "Этот email уже занят"});
+    res.status(409).json({ message: "Этот email уже занят" });
+    return;
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const user = await User.create({ email, passwordHash });
-  const token = signToken(user.id, user.role);
-  setAuthCookie(res, token);
+  const user = await User.create({ email, passwordHash, firstName, lastName });
 
-  res.status(201).json({
-    token: signToken(user.id, user.role),
-    user: toPublicUser(user)
-  });
+  setAuthCookie(res, signToken(user.id, user.role));
+
+  res.status(201).json({ user: toPublicUser(user) });
 });
 
 authRouter.post("/login", async (req, res) => {
   const parsed = credentialsSchema.safeParse(req.body);
 
   if (!parsed.success) {
-    res.status(400).json({ message: "Некорректные данные" });
+    res.status(400).json({ message: "Некорректные данные", errors: z.treeifyError(parsed.error) });
     return;
   }
 
@@ -62,12 +64,9 @@ authRouter.post("/login", async (req, res) => {
     return;
   }
 
-  const token = signToken(user.id, user.role);
-  setAuthCookie(res, token);
+  setAuthCookie(res, signToken(user.id, user.role));
 
-  res.json({
-    user: toPublicUser(user)
-  });
+  res.json({ user: toPublicUser(user) });
 });
 
 authRouter.post('/logout', (_req, res) => {

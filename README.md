@@ -54,7 +54,7 @@ npm run dev                 # http://localhost:5173
 | POST | `/api/auth/register` | все | регистрация (роль executor), ставит cookie |
 | POST | `/api/auth/login` | все | вход, ставит cookie |
 | POST | `/api/auth/logout` | все | сбросить cookie с токеном |
-| GET | `/api/me` | авторизованные | текущий пользователь `{ id, email, role }` |
+| GET | `/api/me` | авторизованные | текущий пользователь `{ id, email, role, firstName, lastName }` |
 | GET | `/api/boards` | авторизованные | доски, доступные пользователю (админ: свои, исполнитель: где есть его задачи) |
 | POST | `/api/boards` | admin | создать доску; статусы создаются по шаблону |
 | GET | `/api/boards/:id` | с доступом к доске | доска со статусами |
@@ -68,7 +68,7 @@ npm run dev                 # http://localhost:5173
 | PATCH | `/api/tasks/:taskId/status` | admin (владелец доски), исполнитель своей задачи | сменить статус задачи |
 | PATCH | `/api/tasks/:taskId` | admin (владелец доски) | изменить задачу (title, description, priority, assigneeId, tags) |
 | DELETE | `/api/tasks/:taskId` | admin (владелец доски) | удалить задачу |
-| GET | `/users` | admin | список пользователей `{ id, email, role }`, фильтр `?role=executor` |
+| GET | `/users` | admin | список пользователей `{ id, email, role, firstName, lastName }`, фильтр `?role=executor` |
 
 ## Роли и права
 
