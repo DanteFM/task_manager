@@ -56,8 +56,9 @@ export default function BoardPage() {
     );
   }
 
-  if (error) return <Alert type="error" showIcon title={error.message} />;
-  if (!boardQuery.data || !tasksQuery.data) return <Skeleton active />;
+  if (!boardQuery.data || !tasksQuery.data) {
+    return error ? <Alert type="error" showIcon title={error.message} /> : <Skeleton active />;
+  }
 
   const { board, statuses } = boardQuery.data;
   const tasks = tasksQuery.data;
