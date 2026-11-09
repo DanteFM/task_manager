@@ -7,7 +7,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core';
-import { Alert, Button, Flex, Result, Skeleton, Typography } from 'antd';
+import { Alert, Button, Flex, Result, Skeleton, Space, Typography } from 'antd';
 import { useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ApiError } from '../api/http';
@@ -20,6 +20,7 @@ import TaskDrawer from '../components/TaskDrawer';
 import TaskFormModal from '../components/TaskFormModal';
 import { useMe } from '../hooks/useMe';
 import { isAdmin } from '../utils/permissions';
+import StatusesModal from '../components/StatusesModal';
 
 export default function BoardPage() {
   const { boardId = '' } = useParams<{ boardId: string }>();
@@ -40,6 +41,7 @@ export default function BoardPage() {
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const deleteTask = useDeleteTask(boardId);
+  const [statusesOpen, setStatusesOpen] = useState(false);
 
   const error = boardQuery.error ?? tasksQuery.error;
   if (error instanceof ApiError && error.status === 404) {
@@ -111,9 +113,12 @@ export default function BoardPage() {
           </Typography.Title>
         </Flex>
         {admin && (
-          <Button type="primary" onClick={() => setTaskModalOpen(true)}>
-            Новая задача
-          </Button>
+          <Space>
+            <Button onClick={() => setStatusesOpen(true)}>Колонки</Button>
+            <Button type="primary" onClick={() => setTaskModalOpen(true)}>
+              Новая задача
+            </Button>
+          </Space>
         )}
       </Flex>
 
@@ -158,6 +163,9 @@ export default function BoardPage() {
           boardId={boardId}
           statuses={columns}
         />
+      )}
+      {admin && statusesOpen && (
+        <StatusesModal boardId={boardId} statuses={columns} onClose={() => setStatusesOpen(false)} />
       )}
     </>
   );
