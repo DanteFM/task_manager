@@ -78,6 +78,8 @@ export function useDeleteTask(boardId: string) {
       message.success('Задача удалена');
       return queryClient.invalidateQueries({ queryKey: ['boards', boardId, 'tasks'] });
     },
-    onError: (error) => message.error(error.message),
+    onError: (error) => {
+      message.error(error.message);
+    }
   });
 }

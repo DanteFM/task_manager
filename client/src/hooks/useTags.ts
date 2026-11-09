@@ -17,6 +17,8 @@ export function useCreateTag() {
       // Дожидаемся обновления списка: тег уже должен быть среди вариантов, когда мы его выберем
       return queryClient.invalidateQueries({ queryKey: ['tags'] });
     },
-    onError: (error) => message.error(error.message),
+    onError: (error) => {
+      message.error(error.message);
+    }
   });
 }

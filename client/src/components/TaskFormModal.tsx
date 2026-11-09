@@ -1,10 +1,12 @@
-import { Alert, Form, Input, Modal, Select } from 'antd';
+import { Alert, Form, Input, Modal, Select, Divider } from 'antd';
 import type { Priority, Status, Task } from '../api/types';
 import { PRIORITY_META } from '../constants/priorities';
 import { useTags } from '../hooks/useTags';
 import { useCreateTask, useUpdateTask } from '../hooks/useTasks';
 import { useExecutors } from '../hooks/useUsers';
 import { userLabel } from '../utils/userName';
+import NewTagInput from './NewTagInput';
+import { useState } from 'react';
 
 interface Props {
   onClose: () => void;
@@ -36,6 +38,7 @@ export default function CreateTaskModal({ onClose, boardId, statuses, task }: Pr
   // Списки грузятся только пока форма открыта
   const executors = useExecutors(true);
   const tags = useTags(true);
+  const [tagsOpenCount, setTagsOpenCount] = useState(0);
 
   const initialValues: Partial<FormValues> = task
     ? {
@@ -137,10 +140,21 @@ export default function CreateTaskModal({ onClose, boardId, statuses, task }: Pr
           <Select
             mode="multiple"
             allowClear
-            showSearch={{ optionFilterProp: "label"}}
+            showSearch={{ optionFilterProp: 'label' }}
             placeholder="Без тегов"
             loading={tags.isPending}
             options={tags.data?.map((tag) => ({ value: tag._id, label: tag.name }))}
+            onOpenChange={(open) => open && setTagsOpenCount((count) => count + 1)}
+            popupRender={(menu) => (
+              <>
+                {menu}
+                <Divider style={{ margin: '8px 0' }} />
+                <NewTagInput
+                  key={tagsOpenCount}
+                  onCreated={(tag) => form.setFieldValue('tags', [...(form.getFieldValue('tags') ?? []), tag._id])}
+                />
+              </>
+            )}
           />
         </Form.Item>
       </Form>
