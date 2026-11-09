@@ -43,27 +43,41 @@ export function useMoveTask(boardId: string) {
 
 export function useCreateTask(boardId: string) {
   const queryClient = useQueryClient();
+  const { message } = App.useApp();
+
   return useMutation({
     mutationFn: (data: TaskInput) => tasksApi.create(boardId, data),
     // Возвращаем промис: форма закроется только после того, как карточка уже появилась на доске
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['boards', boardId, 'tasks'] }),
+    onSuccess: () => {
+      message.success('Задача создана');;
+      return queryClient.invalidateQueries({ queryKey: ['boards', boardId, 'tasks'] });
+    }
   });
 }
 
 export function useUpdateTask(boardId: string) {
   const queryClient = useQueryClient();
+  const { message } = App.useApp();
+
   return useMutation({
     mutationFn: ({ taskId, data }: { taskId: string; data: TaskUpdate }) => tasksApi.update(taskId, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['boards', boardId, 'tasks'] }),
+    onSuccess: () => {
+      message.success('Изменения сохранены');
+      return queryClient.invalidateQueries({ queryKey: ['boards', boardId, 'tasks'] });
+    }
   });
 }
 
 export function useDeleteTask(boardId: string) {
   const queryClient = useQueryClient();
   const { message } = App.useApp();
+
   return useMutation({
     mutationFn: (taskId: string) => tasksApi.remove(taskId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['boards', boardId, 'tasks'] }),
+    onSuccess: () => {
+      message.success('Задача удалена');
+      return queryClient.invalidateQueries({ queryKey: ['boards', boardId, 'tasks'] });
+    },
     onError: (error) => message.error(error.message),
   });
 }
