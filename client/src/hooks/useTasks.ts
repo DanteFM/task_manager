@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { message } from 'antd';
+import { App } from 'antd';
 import { tasksApi, type TaskInput, type TaskUpdate } from '../api/tasks';
 import type { Task } from '../api/types';
 
@@ -12,6 +12,7 @@ export function useBoardTasks(boardId: string) {
 
 export function useMoveTask(boardId: string) {
   const queryClient = useQueryClient();
+  const { message } = App.useApp();
   const tasksKey = ['boards', boardId, 'tasks'];
 
   return useMutation({
@@ -59,6 +60,7 @@ export function useUpdateTask(boardId: string) {
 
 export function useDeleteTask(boardId: string) {
   const queryClient = useQueryClient();
+  const { message } = App.useApp();
   return useMutation({
     mutationFn: (taskId: string) => tasksApi.remove(taskId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['boards', boardId, 'tasks'] }),
