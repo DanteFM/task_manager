@@ -10,12 +10,23 @@ export class ApiError extends Error {
   }
 }
 
+// Текст по умолчанию, когда сервер не прислал свой
+function fallbackMessage(status: number): string {
+  return status >= 500 ? 'Сервер недоступен, попробуйте позже' : 'Ошибка запроса';
+}
+
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const res = await fetch(`/api${path}`, {
-    method,
-    headers: body !== undefined ? { 'Content-Type': "application/json" } : undefined,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`/api${path}`, {
+      method,
+      headers: body !== undefined ? { 'Content-Type': "application/json" } : undefined,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    // fetch бросает исключение, когда до сервера вообще не достучаться (нет сети)
+    throw new ApiError(0, 'Нет связи с сервером. Проверьте подключение');
+  }
 
   // 204 No Content: тела нет
   if (res.status === 204) return undefined as T;
@@ -24,7 +35,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   const data = await res.json().catch(() => null);
 
   if (!res.ok) {
-    throw new ApiError(res.status, data?.message ?? "", data?.errors);
+    throw new ApiError(res.status, data?.message || fallbackMessage(res.status), data?.errors);
   }
 
   return data as T;
