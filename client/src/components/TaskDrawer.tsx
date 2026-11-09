@@ -1,8 +1,11 @@
 import { Descriptions, Drawer, Flex, Tag, Typography, Button, Popconfirm, Space } from 'antd';
 import { useState } from 'react';
-import type { Status, Task } from '../api/types';
+import type { Status, Task, User } from '../api/types';
 import { PRIORITY_META } from '../constants/priorities';
 import { useMe } from '../hooks/useMe';
+import { userLabel } from '../utils/userName';
+import { useExecutors } from '../hooks/useUsers';
+import { isAdmin } from '../utils/permissions';
 
 interface Props {
   task: Task | null;
@@ -16,8 +19,16 @@ interface Props {
 
 const formatDate = (iso: string) => new Date(iso).toLocaleString("ru-RU");
 
+function assigneeText(task: Task, me: User | null | undefined, executors: User[] | undefined): string {
+  if (!task.assigneeId) return 'Не назначен';
+  if (task.assigneeId === me?.id) return 'Вы';
+  const assignee = executors?.find((user) => user.id === task.assigneeId);
+  return assignee ? userLabel(assignee) : 'Назначен';
+}
+
 export default function TaskDrawer({ task, statuses, onClose, canManage, onEdit, onDelete, deleting }: Props) {
   const { data: user } = useMe();
+  const executors = useExecutors(isAdmin(user) && task !== null);
   const [lastTask, setLastTask] = useState<Task | null>(task);
   if (task && task !== lastTask) setLastTask(task);
   const view = task ?? lastTask;
@@ -71,8 +82,7 @@ export default function TaskDrawer({ task, statuses, onClose, canManage, onEdit,
               {
                 key: 'assignee',
                 label: 'Исполнитель',
-                // Имя появится, когда у клиента будет список пользователей
-                children: !view.assigneeId ? 'Не назначен' : view.assigneeId === user?.id ? 'Вы' : 'Назначен',
+                children: assigneeText(view, user, executors.data),
               },
               {
                 key: 'tags',
