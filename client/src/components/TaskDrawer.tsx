@@ -1,4 +1,4 @@
-import { Descriptions, Drawer, Flex, Tag, Typography } from 'antd';
+import { Descriptions, Drawer, Flex, Tag, Typography, Button, Popconfirm, Space } from 'antd';
 import { useState } from 'react';
 import type { Status, Task } from '../api/types';
 import { PRIORITY_META } from '../constants/priorities';
@@ -8,18 +8,46 @@ interface Props {
   task: Task | null;
   statuses: Status[];
   onClose: () => void;
+  canManage: boolean; // admin: показываем «Редактировать» и «Удалить»
+  onEdit: () => void;
+  onDelete: () => void;
+  deleting: boolean;
 }
 
 const formatDate = (iso: string) => new Date(iso).toLocaleString("ru-RU");
 
-export default function TaskDrawer({ task, statuses, onClose }: Props) {
+export default function TaskDrawer({ task, statuses, onClose, canManage, onEdit, onDelete, deleting }: Props) {
   const { data: user } = useMe();
   const [lastTask, setLastTask] = useState<Task | null>(task);
   if (task && task !== lastTask) setLastTask(task);
   const view = task ?? lastTask;
 
     return (
-    <Drawer open={task !== null} onClose={onClose} title={view?.title} size={480}>
+    <Drawer
+      open={task !== null}
+      onClose={onClose}
+      title={view?.title}
+      size={480}
+      extra={
+        canManage && (
+          <Space>
+            <Button onClick={onEdit}>Редактировать</Button>
+            <Popconfirm
+              title="Удалить задачу?"
+              description="Действие нельзя отменить"
+              okText="Удалить"
+              cancelText="Отмена"
+              okButtonProps={{ danger: true }}
+              onConfirm={onDelete}
+            >
+              <Button danger loading={deleting}>
+                Удалить
+              </Button>
+            </Popconfirm>
+          </Space>
+        )
+      }
+    >
       {view && (
         <>
           <Descriptions

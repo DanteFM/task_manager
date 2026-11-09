@@ -15,7 +15,7 @@ import type { Task } from '../api/types';
 import BoardColumn from '../components/BoardColumn';
 import TaskCard from '../components/TaskCard';
 import { useBoard } from '../hooks/useBoards';
-import { useBoardTasks, useMoveTask } from '../hooks/useTasks';
+import { useBoardTasks, useDeleteTask, useMoveTask } from '../hooks/useTasks';
 import TaskDrawer from '../components/TaskDrawer';
 import TaskFormModal from '../components/TaskFormModal';
 import { useMe } from '../hooks/useMe';
@@ -38,6 +38,8 @@ export default function BoardPage() {
   const { data: user } = useMe();
   const admin = isAdmin(user);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const deleteTask = useDeleteTask(boardId);
 
   const error = boardQuery.error ?? tasksQuery.error;
   if (error instanceof ApiError && error.status === 404) {
@@ -136,9 +138,25 @@ export default function BoardPage() {
           {activeTask && <TaskCard task={activeTask} />}
         </DragOverlay>
       </DndContext>
-      <TaskDrawer task={selectedTask} statuses={columns} onClose={closeTask} />
+      <TaskDrawer
+        task={selectedTask}
+        statuses={columns}
+        onClose={closeTask}
+        canManage={admin}
+        onEdit={() => setEditOpen(true)}
+        onDelete={() => selectedTask && deleteTask.mutate(selectedTask._id, { onSuccess: closeTask })}
+        deleting={deleteTask.isPending}
+      />
       {admin && taskModalOpen && (
         <TaskFormModal onClose={() => setTaskModalOpen(false)} boardId={boardId} statuses={columns} />
+      )}
+      {admin && editOpen && selectedTask && (
+        <TaskFormModal
+          task={selectedTask}
+          onClose={() => setEditOpen(false)}
+          boardId={boardId}
+          statuses={columns}
+        />
       )}
     </>
   );
